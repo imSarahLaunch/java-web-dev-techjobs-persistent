@@ -2,6 +2,7 @@ package org.launchcode.javawebdevtechjobspersistent.controllers;
 
 import org.launchcode.javawebdevtechjobspersistent.models.Employer;
 import org.launchcode.javawebdevtechjobspersistent.models.Job;
+import org.launchcode.javawebdevtechjobspersistent.models.Skill;
 import org.launchcode.javawebdevtechjobspersistent.models.data.EmployerRepository;
 import org.launchcode.javawebdevtechjobspersistent.models.data.JobRepository;
 import org.launchcode.javawebdevtechjobspersistent.models.data.SkillRepository;
@@ -34,6 +35,7 @@ public class HomeController {
     public String index(Model model) {
 
         model.addAttribute("title", "My Jobs");
+        model.addAttribute("jobs", jobRepository.findAll());
 
         return "index";
     }
@@ -60,13 +62,18 @@ public class HomeController {
         Employer employer = result.get();
         newJob.setEmployer(employer);
         jobRepository.save(newJob);
+        List<Skill> skillObjs = (List<Skill>) skillRepository.findAllById(skills);
+        newJob.setSkills(skillObjs);
         return "view";
     }
 
     @GetMapping("view/{jobId}")
     public String displayViewJob(Model model, @PathVariable int jobId) {
-        if(jobId >= 1) {
-            model.addAttribute("job", jobRepository.findAll());
+        model.addAttribute("title", "Job: " + jobId);
+        Optional optJob = jobRepository.findById(jobId);
+        if(optJob.isPresent()) {
+            Job job = (Job) optJob.get();
+            model.addAttribute("job", job);
         }
         return "view";
     }
